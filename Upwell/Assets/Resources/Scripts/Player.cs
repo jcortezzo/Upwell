@@ -18,17 +18,20 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
     private Animator anim;
     private Coroutine rotationCoroutine;
+    private Camera gameCamera;
     
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        gameCamera = Camera.main;
     }
 
     // Update is called once per frame
     void Update()
     {
+        ScreenWrap();
         mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         if (Input.GetMouseButtonDown(0))
         {
@@ -65,6 +68,26 @@ public class Player : MonoBehaviour
         {
             transform.rotation = Quaternion.Lerp(startRotation, endRotation, t / duration);
             yield return null;
+        }
+    }
+
+    void ScreenWrap()
+    {
+        float height = 2f * gameCamera.orthographicSize;
+        float width = height * gameCamera.aspect;
+
+        float minXBound = gameCamera.transform.position.x - width / 2f;
+        float maxXBound = gameCamera.transform.position.x + width / 2f;
+
+        float minY = gameCamera.transform.position.y - height / 2f;
+
+        if (transform.position.x > maxXBound)
+        {
+            transform.position = new Vector2(minXBound, transform.position.y);
+        }
+        else if (transform.position.x < minXBound)
+        {
+            transform.position = new Vector2(maxXBound, transform.position.y);
         }
     }
 }
