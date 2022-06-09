@@ -12,8 +12,16 @@ public class Player : MonoBehaviour
     private float TURN_SPEED = 0.2f;
     [SerializeField]
     private float RESET_SPEED = 1f;
+    [SerializeField]
+    private float SHOOT_SPEED = 1f;
+    [SerializeField]
+    private float SHOT_LIFESPAN = 5f;
 
     private Vector3 mousePosition;
+
+    [Header("Prefab Dependencies")]
+    [SerializeField]
+    private GameObject TORNADO_PREFAB;
 
     private Rigidbody2D rb;
     private Animator anim;
@@ -31,7 +39,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ScreenWrap();
+        //ScreenWrap();
         mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         if (Input.GetMouseButtonDown(0))
         {
@@ -69,6 +77,13 @@ public class Player : MonoBehaviour
             transform.rotation = Quaternion.Lerp(startRotation, endRotation, t / duration);
             yield return null;
         }
+    }
+
+    public void Shoot()
+    {
+        GameObject tornado = Instantiate(TORNADO_PREFAB, transform.position, Quaternion.identity, null);
+        tornado.GetComponent<Rigidbody2D>().velocity = -transform.up.normalized * SHOOT_SPEED;
+        Destroy(tornado, SHOT_LIFESPAN);
     }
 
     void ScreenWrap()
