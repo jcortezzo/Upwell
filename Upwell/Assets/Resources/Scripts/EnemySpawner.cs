@@ -22,14 +22,22 @@ public class EnemySpawner : MonoBehaviour
     public Enemy[] SpawnEnemies(int numEnemies)
     {
         Enemy[] enemies = new Enemy[numEnemies];
-        var positions = GetTopScreenPositions(numEnemies);
+        Vector2[] positions = GetTopScreenPositions(numEnemies);
+        Player player = GlobalManager.Instance.Player;
+        Camera camera = GlobalManager.Instance.Camera;
+        float height = GlobalManager.Instance.Camera.pixelHeight;
 
         for (int i = 0; i < numEnemies; i++)
         {
-            Vector2 spawnPosition = positions[i];
-            spawnPosition.y = GlobalManager.Instance.Camera.pixelHeight;
+            Vector2 worldSpaceEnemyPoint = camera.ScreenToWorldPoint(positions[i]);
+            Vector2 playerSpaceEnemyPoint = player.transform.InverseTransformPoint(worldSpaceEnemyPoint);
 
-            Enemy enemy = SpawnEnemy(GlobalManager.Instance.Camera.ScreenToWorldPoint(spawnPosition));
+            float slope = playerSpaceEnemyPoint.y / playerSpaceEnemyPoint.x;
+            float y = player.transform.InverseTransformPoint(camera.ScreenToWorldPoint(new Vector2(0, height))).y;
+            float x = y / slope;
+            Vector2 spawnPosition = player.transform.TransformPoint(new Vector2(x, y));
+
+            Enemy enemy = SpawnEnemy(spawnPosition);
             enemy.EnterScreenPosition = GlobalManager.Instance.Camera.ScreenToWorldPoint(positions[i]);
 
             enemies[i] = enemy;
@@ -43,7 +51,6 @@ public class EnemySpawner : MonoBehaviour
         Vector2[] positions = new Vector2[numEnemies];
         float width = GlobalManager.Instance.Camera.pixelWidth;
         float height = GlobalManager.Instance.Camera.pixelHeight;
-        Debug.Log(width);
         for (int i = 0; i < numEnemies; i++)
         {
             Vector2 screenPoint = new Vector2(((float) i / numEnemies) * width, height - height / GlobalManager.PPU);
