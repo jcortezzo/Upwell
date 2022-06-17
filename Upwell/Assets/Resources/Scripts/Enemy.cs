@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    [field:SerializeField]
+    public Vector2 EnterScreenPosition { get; set; }
+
     [SerializeField]
     private float SPEED = 5f;
     [SerializeField]
@@ -18,7 +21,27 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        StartCoroutine(Attack());
+        StartCoroutine(Lifecycle());
+    }
+
+    private IEnumerator Lifecycle()
+    {
+        yield return EnterScreen();
+        yield return Attack();
+        yield return WaitThenDelete();
+    }
+
+    private IEnumerator EnterScreen()
+    {
+        Vector2 startPosition = this.transform.position;
+        Vector2 endPosition = EnterScreenPosition;
+        float duration = SPEED / SPEED / 2;
+        for (float t = 0f; t < duration; t += Time.deltaTime / duration)
+        {
+            this.transform.position = Vector2.Lerp(startPosition, endPosition, t / duration);
+            yield return null;
+        }
+        this.transform.position = endPosition;
     }
 
     private IEnumerator Attack()
@@ -40,18 +63,6 @@ public class Enemy : MonoBehaviour
         
     }
 
-    private void OnBecameInvisible()
-    {
-        if (deleteCoroutine != null)
-        {
-            StopCoroutine(deleteCoroutine);
-        }
-        if (this != null && this.isActiveAndEnabled)
-        {
-            deleteCoroutine = StartCoroutine(WaitThenDelete());
-        }
-    }
-
     /// <summary>
     /// Destroy self if off screen for TIME_CAN_BE_OFFSCREEN seconds
     /// </summary>
@@ -63,9 +74,14 @@ public class Enemy : MonoBehaviour
             yield break;
         }
         yield return new WaitForSeconds(TIME_CAN_BE_OFFSCREEN);
-        if (this != null && !GetComponent<Renderer>().isVisible)
+        while (true)
         {
-            Destroy(this.gameObject);
+            if (this != null && !GetComponent<Renderer>().isVisible)
+            {
+                Destroy(this.gameObject, 1f);
+                break;
+            }
+            yield return null;
         }
     }
 

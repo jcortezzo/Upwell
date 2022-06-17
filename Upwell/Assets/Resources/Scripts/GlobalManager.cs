@@ -9,6 +9,11 @@ public class GlobalManager : MonoBehaviour
 
     public Camera Camera { get; private set; }
 
+    public float CameraHeight { get { return 2f * Camera.orthographicSize; } }
+    public float CameraWidth { get { return CameraHeight * Camera.aspect; } }
+
+    public const int PPU = 16;
+
     [SerializeField]
     private GameObject LEVEL_MANAGER_PREFAB;
 

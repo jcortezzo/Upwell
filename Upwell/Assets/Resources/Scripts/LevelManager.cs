@@ -33,7 +33,8 @@ public class LevelManager : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(5f);
-            EnemySpawner.SpawnEnemy();
+            //EnemySpawner.SpawnEnemy();
+            EnemySpawner.SpawnEnemies(4);
         }
     }
 }
